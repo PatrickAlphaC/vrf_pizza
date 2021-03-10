@@ -8,7 +8,7 @@ import os
 def get_eth_usd_price_feed_address():
     if network.show_active() == 'development':
         mock_price_feed = MockV3Aggregator.deploy(
-            18, 2000, {'from': accounts[0]})
+            18, 1000000000000000000, {'from': accounts[0]})
         return mock_price_feed.address
     if network.show_active() in config['networks']:
         return config['networks'][network.show_active()]['eth_usd_price_feed']
@@ -55,6 +55,19 @@ def get_vrf_coordinator(get_account, get_link_token):
 
 
 @pytest.fixture
+def get_matic_usd_price_feed_address():
+    if network.show_active() == 'development':
+        mock_price_feed = MockV3Aggregator.deploy(
+            8, 100000000, {'from': accounts[0]})
+        return mock_price_feed.address
+    if network.show_active() in config['networks']:
+        return config['networks'][network.show_active()]['matic_usd_price_feed']
+    else:
+        pytest.skip('Invalid network specified ')
+        return
+
+
+@pytest.fixture
 def get_keyhash(get_account, get_link_token):
     if network.show_active() == 'development' or 'fork' in network.show_active():
         return 0
@@ -65,7 +78,7 @@ def get_keyhash(get_account, get_link_token):
 
 
 @pytest.fixture
-def get_job_id():
+def get_pizza_jobid():
     if network.show_active() == 'development' or 'fork' in network.show_active():
         return 0
     if network.show_active() in config['networks']:
@@ -85,7 +98,7 @@ def get_data():
 
 
 @pytest.fixture
-def get_oracle(get_link_token, get_account):
+def get_pizza_oracle(get_link_token, get_account):
     if network.show_active() == 'development' or 'fork' in network.show_active():
         mock_oracle = MockOracle.deploy(
             get_link_token.address, {'from': get_account})
