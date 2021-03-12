@@ -3,6 +3,7 @@ from brownie import VRF_Pizza, accounts, network, VRF_Pizza_RNG
 import brownie
 
 STATIC_SEED = 123
+STATIC_USD_PRICE = 50
 
 
 @pytest.fixture
@@ -14,10 +15,12 @@ def deploy_vrf_pizza_contract(get_account, get_pizza_jobid, chainlink_fee,
                                  get_matic_usd_price_feed_address,
                                  get_pizza_oracle,
                                  get_pizza_jobid,
+                                 STATIC_USD_PRICE,
                                  {'from': get_account})
     vrf_pizza_rng = VRF_Pizza_RNG.deploy(get_keyhash,
                                          get_vrf_coordinator,
                                          get_link_token,
+                                         chainlink_fee,
                                          {'from': get_account})
 
     # Act

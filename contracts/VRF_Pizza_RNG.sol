@@ -7,8 +7,8 @@ import {VRF_Pizza_Interface} from "../interfaces/VRF_Pizza_Interface.sol";
 
 contract VRF_Pizza_RNG is VRFConsumerBase, Ownable {
     
-    bytes32 internal keyHash;
-    uint256 internal fee;
+    bytes32 public keyHash;
+    uint256 public fee;
     uint256 public randomResult;
     address public vrf_pizza_contract;
     address public vrfCoordinator;
@@ -21,14 +21,14 @@ contract VRF_Pizza_RNG is VRFConsumerBase, Ownable {
      * LINK token address:                0xa36085F69e2889c224210F603D836748e7dC0088
      * Key Hash: 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4
      */
-    constructor(bytes32 _keyhash, address _vrfCoordinator, address _linkToken) 
+    constructor(bytes32 _keyhash, address _vrfCoordinator, address _linkToken, uint256 _fee) 
         VRFConsumerBase(
             _vrfCoordinator, // VRF Coordinator
             _linkToken  // LINK Token
         ) public
     {
         keyHash = _keyhash;
-        fee = 0.1 * 10 ** 18; // 0.1 LINK
+        fee = _fee; // 0.0001 LINK || 0.1 LINK
         vrfCoordinator = _vrfCoordinator;
     }
 
@@ -40,6 +40,7 @@ contract VRF_Pizza_RNG is VRFConsumerBase, Ownable {
      * Requests randomness from a user-provided seed
      */
     function create_random_pizza(uint256 userProvidedSeed) public returns (bytes32 requestId) {
+        require(msg.sender == vrf_pizza_contract, "Only pizza contract can call this");
         require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
         return requestRandomness(keyHash, fee, userProvidedSeed);
     }
@@ -50,6 +51,10 @@ contract VRF_Pizza_RNG is VRFConsumerBase, Ownable {
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
         require(msg.sender == vrfCoordinator, "Fulillment only permitted by Coordinator");
         randomResult = randomness;
-        VRF_Pizza_Interface(vrf_pizza_contract).fulfil_random_pizza();
+        VRF_Pizza_Interface(vrf_pizza_contract).fulfil_random_pizza(randomness);
+    }
+
+    function withdrawLINK(address to, uint256 value) public onlyOwner {
+        require(LINK.transfer(to, value), "Not enough LINK");
     }
 }
