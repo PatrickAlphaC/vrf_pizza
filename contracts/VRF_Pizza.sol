@@ -76,26 +76,14 @@ contract VRF_Pizza is ChainlinkClient, Ownable{
         return price;
     }
 
-        function fulfil_random_pizza(uint256 randomNumber) public {
+    function fulfil_random_pizza(uint256 randomNumber) public {
         require(msg.sender == pizza_rng_address, "Fulillment only permitted by the Pizza RNG Contract");
         Chainlink.Request memory request = buildChainlinkRequest(pizza_jobId, address(this), this.fulfill_pizza.selector);
         request.addUint("random_number", uint32(randomNumber));
         request.add("place_order", "true");
         sendChainlinkRequestTo(oracle, request, fee);
-        // order_queue.push(randomNumber);
     }
 
-    // function execute_order_queue() public {
-    //     // anyone can call this
-    //     require(order_queue.length > 0, "need some orders!");
-    //     for (uint i=0; i< order_queue.length; i++){
-    //         uint256 random_number = order_queue[order_queue.length - 1];
-    //         Chainlink.Request memory request = buildChainlinkRequest(pizza_jobId, address(this), this.fulfill_pizza.selector);
-    //         request.addInt("random_number", int(random_number));
-    //         sendChainlinkRequestTo(oracle, request, fee);
-    //         order_queue.pop();
-    //     }
-    // }
 
     function fulfill_pizza(bytes32 _requestId, bytes32 _pizza_response) public recordChainlinkFulfillment(_requestId)
     {
